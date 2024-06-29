@@ -1,6 +1,9 @@
 # Lidar Scanner Garry's Mod
 A small Garry's Mod project which implements the LIDAR Scanner function.
 Also if you want to import dots into Blender: https://github.com/Adon1111222/lidarscanner_scanstoblender
+## Download
+Latest release(zip): https://github.com/Adon1111222/lidarscanner_garrysmod/releases/latest/download/lidarscanner2.zip
+
 ## Build
 If you want to build from source code, you need to compress the code using minifycode in a folder or other application.
 This will keep the file size to a minimum. Also, game should launch it without minify.
