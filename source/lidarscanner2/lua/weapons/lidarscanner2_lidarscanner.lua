@@ -1,6 +1,6 @@
 AddCSLuaFile()
 
-local LIDARSCANNER_VERSION = "2.1"
+local LIDARSCANNER_VERSION = "2.2"
 
 SWEP.ViewModel              = "models/weapons/c_pistol.mdl"
 SWEP.WorldModel             = "models/weapons/w_pistol.mdl"
@@ -164,8 +164,9 @@ if CLIENT then
 	CreateClientConVar("lidarscanner_enabled",1,true,false,"1 - enables addon. 0 - disables addon.",0,1)
 	CreateClientConVar("lidarscanner_showprojectors",1,true,false,"1 - enables projectors display. 0 - disables.",0,1)
 	CreateClientConVar("lidarscanner_glitch_enabled",1,true,false,"1 - enables screen glitch. 0 - disables screen glitch.",0,1)
-	CreateClientConVar("lidarscanner_savescans_syncwritesnum",20,true,false,"the number of dots that will be written in one file request. the more, the faster and the more the load on the disk. 5 - 30",5,30)
+	CreateClientConVar("lidarscanner_savescans_syncwritesnum",60,true,false,"the number of dots that will be written in one file request. the more, the faster and the more the load on the disk. 5 - 60",5,60)
 	CreateClientConVar("lidarscanner_savedots",0,true,false,"1 - saves dots for later saving. 0 - does not save, which prevents you from saving.",0,1)
+	CreateClientConVar("lidarscanner_loadscans_cleardots",0,true,false,"1 - clears dots before loading. 0 - does not clear.",0,1)
 	CreateClientConVar("lidarscanner_prescan_enabled",0,true,false,"1 - enables prescan functions call. 0 - disables. ",0,1)
 	CreateClientConVar("lidarscanner_postscan_enabled",0,true,false,"1 - enables postscan function call. 0 - disables.",0,1)
 	CreateClientConVar("lidarscanner_burstscan_180scan",0,true,false,"1 - enables 180 degrees burst scan. 0 - disables.",0,1)
@@ -414,7 +415,7 @@ if CLIENT then
 	local function safequad(pos,norm,sizex,sizey,colour)
 		mesh.QuadEasy(pos or Vector(0,0,0),norm or Vector(0,0,0),sizex or 1,sizey or 1,colour or Color(255,255,255))
 	end
-	local frametime = (RealFrameTime()/2)
+	local frametime = math.min(RealFrameTime()/2,0.007)
 	local maxmeshes = GetConVarNumber("lidarscanner_maxmeshes")
 	local dotsize = GetConVarNumber("lidarscanner_dotsize")
 	local maxdots = GetConVarNumber("lidarscanner_maxdots")
@@ -598,7 +599,7 @@ if CLIENT then
 		LidarScanner_PostScan()
 	end
 	local function LidarScanner_StartBurstScan()
-		frametime = (RealFrameTime()/2)
+		frametime = math.min(RealFrameTime()/2,0.007)
 		--LidarScanner_DoBurstScan(GetConVarNumber("lidarscanner_mirror_enabled") == 1)
 		burstscan_pos = 0
 	end
@@ -729,39 +730,43 @@ if CLIENT then
 		local infofilename = "lidarscanner_savedscans/_info.json"
 		local filename = "lidarscanner_savedscans/" .. oldfilename
 		local arraysize = array_count(savedots)
-		file.Write(infofilename,"0/" .. arraysize)
-		file.Write(filename,"LIDARSCANNERSCANFILE") -- 20
 		local maxnum = GetConVarNumber("lidarscanner_savescans_syncwritesnum")
-		local str = ""
 		local rp = 0
+		file.Write(infofilename,"0/" .. arraysize)
+		local ofile = file.Open(filename,"wb","DATA")
+		ofile:Write("LIDARSCANNERSCANS2\0\0") -- 20
+		print(arraysize)
+		ofile:WriteLong(arraysize)
+		print(arraysize)
 		for k,v in pairs(array_data(savedots)) do
-			str = str .. "\n" .. util.TableToJSON(v)
+			local pos,norm,clr = v[1],v[2],v[3]
+			ofile:WriteFloat(pos.x)
+			ofile:WriteFloat(pos.y)
+			ofile:WriteFloat(pos.z)
+			
+			ofile:WriteFloat(norm.x)
+			ofile:WriteFloat(norm.y)
+			ofile:WriteFloat(norm.z)
+			
+			ofile:WriteByte(clr.r)
+			ofile:WriteByte(clr.g)
+			ofile:WriteByte(clr.b)
 			rp = rp + 1
 			if rp > maxnum then
-				file.Append(filename,str)
 				file.Write(infofilename,oldfilename .. "\n" .. k .. "/" .. arraysize)
-				str = ""
 				rp = 0
 			end
 		end
-		if rp ~= 0 then
-			file.Append(filename,str)
-			file.Write(infofilename,oldfilename .. "\n" .. arraysize .. "/" .. arraysize .. "\nDONE")
-			system.FlashWindow()
-		end
-		str = nil
-		rp = nil
-		maxnum = nil
-		arraysize = nil
-		filename = nil
-		infofilename = nil
+		ofile:Close()
 	end
 	function LidarScanner_LoadScans(filename)
-		local file = file.Open("lidarscanner_savedscans/" .. filename .. ".txt","r","DATA")
-		local header = file:Read(20)
-		if header == "LIDARSCANNERSCANFILE" then
+		if GetConVarNumber("lidarscanner_loadscans_cleardots") == 1 then
+			LidarScanner_ClearAllScans()
+		end
+		local file = file.Open("lidarscanner_savedscans/" .. filename .. ".txt","rb","DATA")
+		local headersign = file:Read(20)
+		if headersign == "LIDARSCANNERSCANFILE" then -- first version
 			file:Seek(20)
-			--file:ReadLine()
 			for i = 1,2147483647 do
 				local data = file:ReadLine()
 				if not data then break end
@@ -775,8 +780,16 @@ if CLIENT then
 					end
 				end
 			end
+		elseif headersign == "LIDARSCANNERSCANS2\0\0" then -- second version
+			local len = file:ReadLong()
+			-- LENx27 size
+			for i = 1,math.max(len,1) do
+				local pos,normal,colour = Vector(file:ReadFloat(),file:ReadFloat(),file:ReadFloat()),Vector(file:ReadFloat(),file:ReadFloat(),file:ReadFloat()),Color(file:ReadByte(),file:ReadByte(),file:ReadByte())
+				LidarScanner_AddDot(pos or Vector(0,0,0),normal or Vector(0,0,0),colour or Color(0,0,0))
+				if file:EndOfFile() then break end
+			end
 		else
-			print("HEADER NOT VALID: " .. header .. " " .. "LIDARSCANNERSCANFILE")
+			print("INVALID SIGNATURE: " .. headersign)
 		end
 		file:Close()
 	end
@@ -1209,7 +1222,7 @@ if CLIENT then
 				if text_entry_filename:GetValue() then
 					label = vgui.Create("DLabel",savemenu)
 					label:SetPos(5,90)
-					label:SetText("do not worry, we will save everything quickly...\nyou can watch the process in the folder Garry's Mod/garrysmod/data/lidarscanner_savedscans/_info.json")
+					label:SetText("do not worry, we will save everything quickly...\nyou can watch the process in the file Garry's Mod/garrysmod/data/lidarscanner_savedscans/_info.json")
 					label:SizeToContents()
 					writequeue = text_entry_filename:GetValue()
 				end
@@ -1236,17 +1249,53 @@ if CLIENT then
 		saveslist:AddColumn("Ind")
 		saveslist:AddColumn("Name")
 		saveslist:AddColumn("Size(KB)")
+		saveslist:AddColumn("Date(H:M:S D.M.Y)")
 		local function reloadsaveslist()
 			for k,v in pairs(saveslist:GetLines()) do
 				saveslist:RemoveLine(k)
 			end
 			for k,v in pairs(file.Find("lidarscanner_savedscans/*.txt","DATA")) do
-				saveslist:AddLine(k,string.TrimRight(v,".txt"),math.Round(file.Size("lidarscanner_savedscans/" .. v,"DATA")/1024,2))
+				saveslist:AddLine(k,string.TrimRight(v,".txt"),math.Round(file.Size("lidarscanner_savedscans/" .. v,"DATA")/1024,2),os.date("%H:%M:%S %d.%b.%Y",file.Time("lidarscanner_savedscans/" .. v,"DATA")))
 			end
 		end
 		reloadsaveslist()
-		button(loadmenu,405,60,64,32,"LOAD",function() local _,pnl = saveslist:GetSelectedLine() if pnl then LidarScanner_LoadScans(pnl:GetColumnText(2)) reloadsaveslist() end end)
-		button(loadmenu,405,30,64,16,"REFRESH",function() reloadsaveslist() end)
+		local timetext = vgui.Create("DLabel",loadmenu)
+		timetext:SetPos(405,180)
+		timetext:SetSize(64,32)
+		timetext:SetText("")
+		checkbox(loadmenu,405,150,"Clear dots\nbefore load","lidarscanner_loadscans_cleardots")
+		button(loadmenu,405,120,64,16,"DELETE",function()
+			local popup_window = vgui.Create("DFrame")
+			popup_window:SetSize(256,128)
+			popup_window:Center()
+			popup_window:SetTitle("WARNING")
+			popup_window:MakePopup()
+			popup_window:SetDraggable(false)
+			local label = vgui.Create("DLabel",popup_window)
+			label:SetPos(30,30)
+			label:SetText("Are you sure you want to delete scan file?")
+			label:SizeToContents()
+			local reset_btn_accept = vgui.Create("DButton",popup_window)
+			reset_btn_accept:SetPos(32,90)
+			reset_btn_accept:SetSize(16,16)
+			reset_btn_accept:SetText("Y")
+			reset_btn_accept.DoClick = function()
+				local _,pnl = saveslist:GetSelectedLine()
+				if pnl then
+					file.Delete("lidarscanner_savedscans/" .. pnl:GetColumnText(2) .. ".txt")
+					reloadsaveslist()
+					timetext:SetText("")
+				end
+				popup_window:Close()
+			end
+			local reset_btn_cancel = vgui.Create("DButton",popup_window)
+			reset_btn_cancel:SetPos(164,64)
+			reset_btn_cancel:SetSize(64,64)
+			reset_btn_cancel:SetText("NO")
+			reset_btn_cancel.DoClick = function() popup_window:Close() end
+		end)
+		button(loadmenu,405,60,64,32,"LOAD",function() local _,pnl = saveslist:GetSelectedLine() if pnl then local starttime = SysTime() LidarScanner_LoadScans(pnl:GetColumnText(2)) timetext:SetText(tostring(math.Round(SysTime()-starttime,2)) .. " sec") reloadsaveslist() end end)
+		button(loadmenu,405,30,64,16,"REFRESH",function() timetext:SetText("") reloadsaveslist() end)
 	end)
 	concommand.Add("lidarscanner_opensaveloadmenu",function()
 		local saveloadmenu = vgui.Create("DFrame")
