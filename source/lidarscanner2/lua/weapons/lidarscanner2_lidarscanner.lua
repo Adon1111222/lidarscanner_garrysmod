@@ -1,4 +1,4 @@
-AddCSLuaFile()
+AddCSLuaFile("lidarscanner2_lidarscanner.lua")
 
 local LIDARSCANNER_VERSION = "2.2"
 
@@ -227,6 +227,14 @@ if CLIENT then
 	file.CreateDir("lidarscanner_savedscans")
 	
 	-- Network receive function for shared points
+        local addoninitialized = false
+        local function EnsureExtensionsLoaded()
+            if not addoninitialized then
+                LidarScanner_LoadExtensions()
+                addoninitialized = true
+            end
+        end
+
 	net.Receive("lidarscanner2_sharedots", function()
 		if GetConVarNumber("lidarscanner_enabled") ~= 1 then return end
 		
