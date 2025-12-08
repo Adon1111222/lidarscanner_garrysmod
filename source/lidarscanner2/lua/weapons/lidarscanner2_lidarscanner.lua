@@ -22,6 +22,11 @@ SWEP.DrawAmmo				= false
 SWEP.DrawCrosshair			= false
 SWEP.Spawnable				= true
 
+-- Client-side storage for shared scan points
+lidarscanner_shared_dots_pos = {}
+lidarscanner_shared_dots_normal = {}
+lidarscanner_shared_dots_colour = {}
+
 function SWEP:Initialize()
 	self:SetHoldType("pistol")
 end
@@ -31,6 +36,57 @@ if SERVER then
 	CreateConVar("lidarscanner_sv_seeker_enabled",0,FCVAR_ARCHIVE,"1 - enables seeker. 0 - disables seeker.",0,1)
 
 	util.AddNetworkString("lidarscanner2_network")
+	util.AddNetworkString("lidarscanner2_sharedots")
+	
+	-- Server-side storage for shared scan points
+	lidarscanner_shared_points = {}
+	
+	-- Network receive function to handle point sharing
+	net.Receive("lidarscanner2_sharedots", function(len, ply)
+		if GetConVarNumber("lidarscanner_sv_enabled") ~= 1 then return end
+		if not IsValid(ply) then return end
+		
+		local point_count = net.ReadUInt(16)
+		if point_count > 0 then
+			local points_to_share = {}
+			
+			for i = 1, point_count do
+				local pos = net.ReadVector()
+				local normal = net.ReadVector()
+				local r = net.ReadUInt(8)
+				local g = net.ReadUInt(8)
+				local b = net.ReadUInt(8)
+				table.insert(points_to_share, {pos = pos, normal = normal, colour = Color(r, g, b)})
+			end
+			
+			-- Add points to server storage
+			for _, point in ipairs(points_to_share) do
+				table.insert(lidarscanner_shared_points, point)
+			end
+			
+			-- Limit the number of points to prevent memory issues
+			local max_server_points = 50000 -- configurable limit
+			if #lidarscanner_shared_points > max_server_points then
+				-- Remove oldest points
+				local points_to_remove = #lidarscanner_shared_points - max_server_points
+				for i = 1, points_to_remove do
+					table.remove(lidarscanner_shared_points, 1)
+				end
+			end
+			
+			-- Broadcast points to all players
+			net.Start("lidarscanner2_sharedots")
+			net.WriteUInt(#points_to_share, 16)
+			for _, point in ipairs(points_to_share) do
+				net.WriteVector(point.pos)
+				net.WriteVector(point.normal)
+				net.WriteUInt(point.colour.r, 8)
+				net.WriteUInt(point.colour.g, 8)
+				net.WriteUInt(point.colour.b, 8)
+			end
+			net.Broadcast()
+		end
+	end)
 	function SWEP:StopScanSound()
 		local owner = self:GetOwner()
 		if IsValid(owner) then
@@ -154,6 +210,27 @@ if SERVER then
 end
 if CLIENT then
 	file.CreateDir("lidarscanner_savedscans")
+	
+	-- Network receive function for shared points
+	net.Receive("lidarscanner2_sharedots", function()
+		if GetConVarNumber("lidarscanner_enabled") ~= 1 then return end
+		
+		local point_count = net.ReadUInt(16)
+		if point_count > 0 then
+			for i = 1, point_count do
+				local pos = net.ReadVector()
+				local normal = net.ReadVector()
+				local r = net.ReadUInt(8)
+				local g = net.ReadUInt(8)
+				local b = net.ReadUInt(8)
+				
+				table.insert(lidarscanner_shared_dots_pos, pos)
+				table.insert(lidarscanner_shared_dots_normal, normal)
+				table.insert(lidarscanner_shared_dots_colour, Color(r, g, b))
+			end
+		end
+	end)
+	
 	function SWEP:PreDrawViewModel() return true end
 	local lidarscanner_currentcolour = 0
 	local lidarscanner_extensions = {}
