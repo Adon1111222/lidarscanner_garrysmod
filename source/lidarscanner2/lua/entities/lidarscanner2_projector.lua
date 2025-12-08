@@ -53,7 +53,7 @@ if SERVER then
                 net.WriteVector(self:GetPos())
                 net.WriteAngle(self:GetAngles())
                 net.WriteEntity(self)
-            net.Send(scanning)
+            net.Broadcast()
             self:NextThink(CurTime()+FrameTime())
             return true
         end

@@ -1,4 +1,4 @@
-AddCSLuaFile()
+AddCSLuaFile("lidarscanner2_lidarscanner.lua")
 
 local LIDARSCANNER_VERSION = "2.2"
 
@@ -22,8 +22,16 @@ SWEP.DrawAmmo				= false
 SWEP.DrawCrosshair			= false
 SWEP.Spawnable				= true
 
+-- Client-side storage for shared scan points
+lidarscanner_shared_dots_pos = {}
+lidarscanner_shared_dots_normal = {}
+lidarscanner_shared_dots_colour = {}
+
 function SWEP:Initialize()
 	self:SetHoldType("pistol")
+	if CLIENT then
+		EnsureExtensionsLoaded()
+	end
 end
 if SERVER then
 	CreateConVar("lidarscanner_sv_enabled",1,FCVAR_ARCHIVE,"1 - enables addon. 0 - disables addon.",0,1)
@@ -31,13 +39,68 @@ if SERVER then
 	CreateConVar("lidarscanner_sv_seeker_enabled",0,FCVAR_ARCHIVE,"1 - enables seeker. 0 - disables seeker.",0,1)
 
 	util.AddNetworkString("lidarscanner2_network")
+	util.AddNetworkString("lidarscanner2_sharedots")
+	
+	-- Server-side storage for shared scan points
+	lidarscanner_shared_points = {}
+	
+	-- Network receive function to handle point sharing
+	net.Receive("lidarscanner2_sharedots", function(len, ply)
+		if GetConVarNumber("lidarscanner_sv_enabled") ~= 1 then return end
+		if not IsValid(ply) then return end
+		
+		local point_count = net.ReadUInt(16)
+		if point_count > 0 then
+			local points_to_share = {}
+			
+			for i = 1, point_count do
+				local pos = net.ReadVector()
+				local normal = net.ReadVector()
+				local r = net.ReadUInt(8)
+				local g = net.ReadUInt(8)
+				local b = net.ReadUInt(8)
+				table.insert(points_to_share, {pos = pos, normal = normal, colour = Color(r, g, b)})
+			end
+			
+			-- Add points to server storage
+			for _, point in ipairs(points_to_share) do
+				table.insert(lidarscanner_shared_points, point)
+			end
+			
+			-- Limit the number of points to prevent memory issues
+			local max_server_points = 50000 -- configurable limit
+			if #lidarscanner_shared_points > max_server_points then
+				-- Remove oldest points
+				local points_to_remove = #lidarscanner_shared_points - max_server_points
+				for i = 1, points_to_remove do
+					table.remove(lidarscanner_shared_points, 1)
+				end
+			end
+			
+			-- Broadcast points to all players
+			net.Start("lidarscanner2_sharedots")
+			net.WriteUInt(#points_to_share, 16)
+			for _, point in ipairs(points_to_share) do
+				net.WriteVector(point.pos)
+				net.WriteVector(point.normal)
+				net.WriteUInt(point.colour.r, 8)
+				net.WriteUInt(point.colour.g, 8)
+				net.WriteUInt(point.colour.b, 8)
+			end
+			net.Broadcast()
+		end
+	end)
 	function SWEP:StopScanSound()
 		local owner = self:GetOwner()
 		if IsValid(owner) then
+			-- Ensure extensions are loaded before stopping scan
+			if CLIENT then
+				EnsureExtensionsLoaded()
+			end
 			self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
 			net.Start("lidarscanner2_network")
 			net.WriteInt(-1,3)
-			net.Send(owner)
+			net.Send(owner) -- Send only to the owner, not all players
 		end
 	end
 	function SWEP:OnDrop()
@@ -56,7 +119,7 @@ if SERVER then
 		if IsValid(owner) then
 			net.Start("lidarscanner2_network")
 			net.WriteInt(0,3)
-			net.Send(owner)
+			net.Send(owner) -- Send only to the owner, not all players
 			self:SetNextSecondaryFire(CurTime()+0.25)
 		end
 	end
@@ -64,12 +127,13 @@ if SERVER then
 		if GetConVarNumber("lidarscanner_sv_enabled") ~= 1 then return end
 		local owner = self:GetOwner()
 		if IsValid(owner) and not self.burstscanning then
+			-- Ensure extensions are loaded before starting scan
+			if CLIENT then
+				EnsureExtensionsLoaded()
+			end
 			net.Start("lidarscanner2_network")
 			net.WriteInt(1,3)
-			net.Send(owner)
-			if not self.scanning then
-				self:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
-			end
+			net.Send(owner) -- Send only to the owner, not all players
 			self.scanning = true
 		end
 	end
@@ -77,10 +141,14 @@ if SERVER then
 		if GetConVarNumber("lidarscanner_sv_enabled") ~= 1 then return end
 		local owner = self:GetOwner()
 		if IsValid(owner) and not self.burstscanning then
+			-- Ensure extensions are loaded before starting scan
+			if CLIENT then
+				EnsureExtensionsLoaded()
+			end
 			self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
 			net.Start("lidarscanner2_network")
 			net.WriteInt(2,3)
-			net.Send(owner)
+			net.Send(owner) -- Send only to the owner, not all players
 			self.burstscanning = true
 			local snd = CreateSound(self,"lidarscanner2_sounds_valve/lidarscanner2_burstscanning" .. math.random(1,4) .. ".wav")
 			snd:Play()
@@ -116,7 +184,7 @@ if SERVER then
 												owner:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onseen.wav",75,100,1,CHAN_AUTO,0,0,flt)
 												net.Start("lidarscanner2_network")
 												net.WriteInt(-3,3)
-												net.Send(owner)
+												net.Send(owner) -- Send only to the owner, not all players
 												timer.Simple(0.5,function()
 													if IsValid(seeker) then
 														seeker:Remove()
@@ -140,12 +208,15 @@ if SERVER then
 		local owner = self:GetOwner()
 		if IsValid(owner) then
 			if not owner:KeyDown(IN_ATTACK) then
+				-- Ensure extensions are loaded before stopping scan
+				if CLIENT then
+					EnsureExtensionsLoaded()
+				end
 				net.Start("lidarscanner2_network")
 				net.WriteInt(-1,3)
-				net.Send(owner)
+				net.Send(owner) -- Send only to the owner, not all players
 				if self.scanning then
 					self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
-					self:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav")
 					self.scanning = false
 				end
 			end
@@ -154,6 +225,35 @@ if SERVER then
 end
 if CLIENT then
 	file.CreateDir("lidarscanner_savedscans")
+	
+	-- Network receive function for shared points
+        local addoninitialized = false
+        local function EnsureExtensionsLoaded()
+            if not addoninitialized then
+                LidarScanner_LoadExtensions()
+                addoninitialized = true
+            end
+        end
+
+	net.Receive("lidarscanner2_sharedots", function()
+		if GetConVarNumber("lidarscanner_enabled") ~= 1 then return end
+		
+		local point_count = net.ReadUInt(16)
+		if point_count > 0 then
+			for i = 1, point_count do
+				local pos = net.ReadVector()
+				local normal = net.ReadVector()
+				local r = net.ReadUInt(8)
+				local g = net.ReadUInt(8)
+				local b = net.ReadUInt(8)
+				
+				table.insert(lidarscanner_shared_dots_pos, pos)
+				table.insert(lidarscanner_shared_dots_normal, normal)
+				table.insert(lidarscanner_shared_dots_colour, Color(r, g, b))
+			end
+		end
+	end)
+	
 	function SWEP:PreDrawViewModel() return true end
 	local lidarscanner_currentcolour = 0
 	local lidarscanner_extensions = {}
@@ -1436,20 +1536,52 @@ if CLIENT then
 
 		checkbox(frame,564,27,"Developer","lidarscanner_developer")
 	end)
-	net.Receive("lidarscanner2_network",function()
-		if GetConVarNumber("lidarscanner_enabled") ~= 1 then return end
-		local ply = LocalPlayer()
-		if IsValid(ply) then
-			local int = net.ReadInt(3)
-			if int then
-				if int == -3 then
-					screen_glitch = 3
-				else
-					lidarscanner_readqueue = {int = int,start = net.ReadVector(),angles = net.ReadAngle(),ent = net.ReadEntity()}
-				end
-			end
-		end
-	end)
+	local addoninitialized = false
+local function EnsureExtensionsLoaded()
+    if not addoninitialized then
+        LidarScanner_LoadExtensions()
+        addoninitialized = true
+    end
+end
+
+net.Receive("lidarscanner2_network",function()
+    if GetConVarNumber("lidarscanner_enabled") ~= 1 then return end
+    local ply = LocalPlayer()
+    if IsValid(ply) then
+        -- Ensure extensions are loaded before processing network commands
+        EnsureExtensionsLoaded()
+        
+        local int = net.ReadInt(3) -- Читаем 3-битное целое число
+        local data = {int = int} -- Инициализируем таблицу с int
+
+        -- Читаем остальные данные только если int == -2
+        if int == -2 then
+            data.start = net.ReadVector()
+            data.angles = net.ReadAngle()
+            data.ent = net.ReadEntity()
+        elseif int == -3 then
+            screen_glitch = 3
+            -- Не нужно ставить return, просто не читаем больше данных
+        end
+
+        -- Play sounds on the client when receiving network commands
+        -- Only play sounds for the player who is actually scanning
+        local wep = ply:GetActiveWeapon()
+        if IsValid(wep) and wep:GetClass() == "lidarscanner2_lidarscanner" then
+            if int == 1 then -- Primary attack (fast scan start)
+                wep:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav", 75, 100, 1, CHAN_WEAPON)
+            elseif int == -1 then -- Stop scanning
+                wep:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
+                wep:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav", 75, 100, 1, CHAN_WEAPON)
+            elseif int == 2 then -- Burst scan
+                wep:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_burstscanning" .. math.random(1,4) .. ".wav", 75, 100, 1, CHAN_WEAPON)
+            end
+        end
+
+        -- Сохраняем всю структуру, включая int, в lidarscanner_readqueue
+        lidarscanner_readqueue = data
+    end
+end)
 	local function DrawGlitchEffect()
 		if GetConVarNumber("lidarscanner_glitch_enabled") == 1 then
 			local glitch = screen_glitch
@@ -1470,12 +1602,10 @@ if CLIENT then
 			cam.End2D()
 		end
 	end
-	local addoninitialized = false
+	
+	
 	hook.Add("PostDrawEffects","lidarscanner2_renderscanhook",function()
-		if not addoninitialized then
-			LidarScanner_LoadExtensions()
-			addoninitialized = true
-		end
+		EnsureExtensionsLoaded()
 		if GetConVarNumber("lidarscanner_enabled") ~= 1 then
 			local ply = LocalPlayer()
 			if IsValid(ply) then
