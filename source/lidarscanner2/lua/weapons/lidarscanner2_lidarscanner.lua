@@ -37,7 +37,7 @@ if SERVER then
 			self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
 			net.Start("lidarscanner2_network")
 			net.WriteInt(-1,3)
-			net.Send(owner)
+			net.Broadcast()
 		end
 	end
 	function SWEP:OnDrop()
@@ -56,7 +56,7 @@ if SERVER then
 		if IsValid(owner) then
 			net.Start("lidarscanner2_network")
 			net.WriteInt(0,3)
-			net.Send(owner)
+			net.Broadcast()
 			self:SetNextSecondaryFire(CurTime()+0.25)
 		end
 	end
@@ -66,7 +66,7 @@ if SERVER then
 		if IsValid(owner) and not self.burstscanning then
 			net.Start("lidarscanner2_network")
 			net.WriteInt(1,3)
-			net.Send(owner)
+			net.Broadcast()
 			if not self.scanning then
 				self:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
 			end
@@ -80,7 +80,7 @@ if SERVER then
 			self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
 			net.Start("lidarscanner2_network")
 			net.WriteInt(2,3)
-			net.Send(owner)
+			net.Broadcast()
 			self.burstscanning = true
 			local snd = CreateSound(self,"lidarscanner2_sounds_valve/lidarscanner2_burstscanning" .. math.random(1,4) .. ".wav")
 			snd:Play()
@@ -116,7 +116,7 @@ if SERVER then
 												owner:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onseen.wav",75,100,1,CHAN_AUTO,0,0,flt)
 												net.Start("lidarscanner2_network")
 												net.WriteInt(-3,3)
-												net.Send(owner)
+												net.Broadcast()
 												timer.Simple(0.5,function()
 													if IsValid(seeker) then
 														seeker:Remove()
@@ -142,7 +142,7 @@ if SERVER then
 			if not owner:KeyDown(IN_ATTACK) then
 				net.Start("lidarscanner2_network")
 				net.WriteInt(-1,3)
-				net.Send(owner)
+				net.Broadcast()
 				if self.scanning then
 					self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
 					self:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav")
