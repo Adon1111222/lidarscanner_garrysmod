@@ -90,6 +90,10 @@ if SERVER then
 	function SWEP:StopScanSound()
 		local owner = self:GetOwner()
 		if IsValid(owner) then
+			-- Ensure extensions are loaded before stopping scan
+			if CLIENT then
+				EnsureExtensionsLoaded()
+			end
 			self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
 			net.Start("lidarscanner2_network")
 			net.WriteInt(-1,3)
@@ -120,6 +124,10 @@ if SERVER then
 		if GetConVarNumber("lidarscanner_sv_enabled") ~= 1 then return end
 		local owner = self:GetOwner()
 		if IsValid(owner) and not self.burstscanning then
+			-- Ensure extensions are loaded before starting scan
+			if CLIENT then
+				EnsureExtensionsLoaded()
+			end
 			net.Start("lidarscanner2_network")
 			net.WriteInt(1,3)
 			net.Broadcast()
@@ -133,6 +141,10 @@ if SERVER then
 		if GetConVarNumber("lidarscanner_sv_enabled") ~= 1 then return end
 		local owner = self:GetOwner()
 		if IsValid(owner) and not self.burstscanning then
+			-- Ensure extensions are loaded before starting scan
+			if CLIENT then
+				EnsureExtensionsLoaded()
+			end
 			self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
 			net.Start("lidarscanner2_network")
 			net.WriteInt(2,3)
@@ -196,6 +208,10 @@ if SERVER then
 		local owner = self:GetOwner()
 		if IsValid(owner) then
 			if not owner:KeyDown(IN_ATTACK) then
+				-- Ensure extensions are loaded before stopping scan
+				if CLIENT then
+					EnsureExtensionsLoaded()
+				end
 				net.Start("lidarscanner2_network")
 				net.WriteInt(-1,3)
 				net.Broadcast()
@@ -1517,6 +1533,9 @@ if CLIENT then
     if GetConVarNumber("lidarscanner_enabled") ~= 1 then return end
     local ply = LocalPlayer()
     if IsValid(ply) then
+        -- Ensure extensions are loaded before processing network commands
+        EnsureExtensionsLoaded()
+        
         local int = net.ReadInt(3) -- Читаем 3-битное целое число
         local data = {int = int} -- Инициализируем таблицу с int
 
@@ -1528,6 +1547,16 @@ if CLIENT then
         elseif int == -3 then
             screen_glitch = 3
             -- Не нужно ставить return, просто не читаем больше данных
+        end
+
+        -- Play sounds on the client when receiving network commands
+        if int == 1 then -- Primary attack (fast scan start)
+            LocalPlayer():EmitSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav", 75, 100, 1, CHAN_WEAPON)
+        elseif int == -1 then -- Stop scanning
+            LocalPlayer():StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
+            LocalPlayer():EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav", 75, 100, 1, CHAN_WEAPON)
+        elseif int == 2 then -- Burst scan
+            LocalPlayer():EmitSound("lidarscanner2_sounds_valve/lidarscanner2_burstscanning" .. math.random(1,4) .. ".wav", 75, 100, 1, CHAN_WEAPON)
         end
 
         -- Сохраняем всю структуру, включая int, в lidarscanner_readqueue
@@ -1555,11 +1584,15 @@ end)
 		end
 	end
 	local addoninitialized = false
-	hook.Add("PostDrawEffects","lidarscanner2_renderscanhook",function()
+	local function EnsureExtensionsLoaded()
 		if not addoninitialized then
 			LidarScanner_LoadExtensions()
 			addoninitialized = true
 		end
+	end
+	
+	hook.Add("PostDrawEffects","lidarscanner2_renderscanhook",function()
+		EnsureExtensionsLoaded()
 		if GetConVarNumber("lidarscanner_enabled") ~= 1 then
 			local ply = LocalPlayer()
 			if IsValid(ply) then
