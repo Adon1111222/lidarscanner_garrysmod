@@ -1514,19 +1514,26 @@ if CLIENT then
 		checkbox(frame,564,27,"Developer","lidarscanner_developer")
 	end)
 	net.Receive("lidarscanner2_network",function()
-		if GetConVarNumber("lidarscanner_enabled") ~= 1 then return end
-		local ply = LocalPlayer()
-		if IsValid(ply) then
-			local int = net.ReadInt(3)
-			if int then
-				if int == -3 then
-					screen_glitch = 3
-				else
-					lidarscanner_readqueue = {int = int,start = net.ReadVector(),angles = net.ReadAngle(),ent = net.ReadEntity()}
-				end
-			end
-		end
-	end)
+    if GetConVarNumber("lidarscanner_enabled") ~= 1 then return end
+    local ply = LocalPlayer()
+    if IsValid(ply) then
+        local int = net.ReadInt(3) -- Читаем 3-битное целое число
+        local data = {int = int} -- Инициализируем таблицу с int
+
+        -- Читаем остальные данные только если int == -2
+        if int == -2 then
+            data.start = net.ReadVector()
+            data.angles = net.ReadAngle()
+            data.ent = net.ReadEntity()
+        elseif int == -3 then
+            screen_glitch = 3
+            -- Не нужно ставить return, просто не читаем больше данных
+        end
+
+        -- Сохраняем всю структуру, включая int, в lidarscanner_readqueue
+        lidarscanner_readqueue = data
+    end
+end)
 	local function DrawGlitchEffect()
 		if GetConVarNumber("lidarscanner_glitch_enabled") == 1 then
 			local glitch = screen_glitch
