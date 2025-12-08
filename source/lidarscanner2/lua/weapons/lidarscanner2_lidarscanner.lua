@@ -29,6 +29,9 @@ lidarscanner_shared_dots_colour = {}
 
 function SWEP:Initialize()
 	self:SetHoldType("pistol")
+	if CLIENT then
+		EnsureExtensionsLoaded()
+	end
 end
 if SERVER then
 	CreateConVar("lidarscanner_sv_enabled",1,FCVAR_ARCHIVE,"1 - enables addon. 0 - disables addon.",0,1)
@@ -97,7 +100,7 @@ if SERVER then
 			self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
 			net.Start("lidarscanner2_network")
 			net.WriteInt(-1,3)
-			net.Broadcast()
+			net.Send(owner) -- Send only to the owner, not all players
 		end
 	end
 	function SWEP:OnDrop()
@@ -116,7 +119,7 @@ if SERVER then
 		if IsValid(owner) then
 			net.Start("lidarscanner2_network")
 			net.WriteInt(0,3)
-			net.Broadcast()
+			net.Send(owner) -- Send only to the owner, not all players
 			self:SetNextSecondaryFire(CurTime()+0.25)
 		end
 	end
@@ -130,10 +133,7 @@ if SERVER then
 			end
 			net.Start("lidarscanner2_network")
 			net.WriteInt(1,3)
-			net.Broadcast()
-			if not self.scanning then
-				self:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
-			end
+			net.Send(owner) -- Send only to the owner, not all players
 			self.scanning = true
 		end
 	end
@@ -148,7 +148,7 @@ if SERVER then
 			self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
 			net.Start("lidarscanner2_network")
 			net.WriteInt(2,3)
-			net.Broadcast()
+			net.Send(owner) -- Send only to the owner, not all players
 			self.burstscanning = true
 			local snd = CreateSound(self,"lidarscanner2_sounds_valve/lidarscanner2_burstscanning" .. math.random(1,4) .. ".wav")
 			snd:Play()
@@ -184,7 +184,7 @@ if SERVER then
 												owner:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onseen.wav",75,100,1,CHAN_AUTO,0,0,flt)
 												net.Start("lidarscanner2_network")
 												net.WriteInt(-3,3)
-												net.Broadcast()
+												net.Send(owner) -- Send only to the owner, not all players
 												timer.Simple(0.5,function()
 													if IsValid(seeker) then
 														seeker:Remove()
@@ -214,10 +214,9 @@ if SERVER then
 				end
 				net.Start("lidarscanner2_network")
 				net.WriteInt(-1,3)
-				net.Broadcast()
+				net.Send(owner) -- Send only to the owner, not all players
 				if self.scanning then
 					self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
-					self:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav")
 					self.scanning = false
 				end
 			end
@@ -1558,13 +1557,17 @@ net.Receive("lidarscanner2_network",function()
         end
 
         -- Play sounds on the client when receiving network commands
-        if int == 1 then -- Primary attack (fast scan start)
-            LocalPlayer():EmitSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav", 75, 100, 1, CHAN_WEAPON)
-        elseif int == -1 then -- Stop scanning
-            LocalPlayer():StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
-            LocalPlayer():EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav", 75, 100, 1, CHAN_WEAPON)
-        elseif int == 2 then -- Burst scan
-            LocalPlayer():EmitSound("lidarscanner2_sounds_valve/lidarscanner2_burstscanning" .. math.random(1,4) .. ".wav", 75, 100, 1, CHAN_WEAPON)
+        -- Only play sounds for the player who is actually scanning
+        local wep = ply:GetActiveWeapon()
+        if IsValid(wep) and wep:GetClass() == "lidarscanner2_lidarscanner" then
+            if int == 1 then -- Primary attack (fast scan start)
+                wep:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav", 75, 100, 1, CHAN_WEAPON)
+            elseif int == -1 then -- Stop scanning
+                wep:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
+                wep:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav", 75, 100, 1, CHAN_WEAPON)
+            elseif int == 2 then -- Burst scan
+                wep:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_burstscanning" .. math.random(1,4) .. ".wav", 75, 100, 1, CHAN_WEAPON)
+            end
         end
 
         -- Сохраняем всю структуру, включая int, в lidarscanner_readqueue
