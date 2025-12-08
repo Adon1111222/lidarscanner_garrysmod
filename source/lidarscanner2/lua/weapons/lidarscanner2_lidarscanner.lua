@@ -131,9 +131,6 @@ if SERVER then
 			net.Start("lidarscanner2_network")
 			net.WriteInt(1,3)
 			net.Broadcast()
-			if not self.scanning then
-				self:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
-			end
 			self.scanning = true
 		end
 	end
@@ -217,7 +214,6 @@ if SERVER then
 				net.Broadcast()
 				if self.scanning then
 					self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
-					self:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav")
 					self.scanning = false
 				end
 			end
@@ -1558,13 +1554,17 @@ net.Receive("lidarscanner2_network",function()
         end
 
         -- Play sounds on the client when receiving network commands
-        if int == 1 then -- Primary attack (fast scan start)
-            LocalPlayer():EmitSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav", 75, 100, 1, CHAN_WEAPON)
-        elseif int == -1 then -- Stop scanning
-            LocalPlayer():StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
-            LocalPlayer():EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav", 75, 100, 1, CHAN_WEAPON)
-        elseif int == 2 then -- Burst scan
-            LocalPlayer():EmitSound("lidarscanner2_sounds_valve/lidarscanner2_burstscanning" .. math.random(1,4) .. ".wav", 75, 100, 1, CHAN_WEAPON)
+        -- Only play sounds for the player who is actually scanning
+        local wep = ply:GetActiveWeapon()
+        if IsValid(wep) and wep:GetClass() == "lidarscanner2_lidarscanner" then
+            if int == 1 then -- Primary attack (fast scan start)
+                wep:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav", 75, 100, 1, CHAN_WEAPON)
+            elseif int == -1 then -- Stop scanning
+                wep:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
+                wep:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav", 75, 100, 1, CHAN_WEAPON)
+            elseif int == 2 then -- Burst scan
+                wep:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_burstscanning" .. math.random(1,4) .. ".wav", 75, 100, 1, CHAN_WEAPON)
+            end
         end
 
         -- Сохраняем всю структуру, включая int, в lidarscanner_readqueue
