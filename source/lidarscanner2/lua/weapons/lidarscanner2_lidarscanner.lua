@@ -1529,7 +1529,15 @@ if CLIENT then
 
 		checkbox(frame,564,27,"Developer","lidarscanner_developer")
 	end)
-	net.Receive("lidarscanner2_network",function()
+	local addoninitialized = false
+local function EnsureExtensionsLoaded()
+    if not addoninitialized then
+        LidarScanner_LoadExtensions()
+        addoninitialized = true
+    end
+end
+
+net.Receive("lidarscanner2_network",function()
     if GetConVarNumber("lidarscanner_enabled") ~= 1 then return end
     local ply = LocalPlayer()
     if IsValid(ply) then
@@ -1583,13 +1591,7 @@ end)
 			cam.End2D()
 		end
 	end
-	local addoninitialized = false
-	local function EnsureExtensionsLoaded()
-		if not addoninitialized then
-			LidarScanner_LoadExtensions()
-			addoninitialized = true
-		end
-	end
+	
 	
 	hook.Add("PostDrawEffects","lidarscanner2_renderscanhook",function()
 		EnsureExtensionsLoaded()
