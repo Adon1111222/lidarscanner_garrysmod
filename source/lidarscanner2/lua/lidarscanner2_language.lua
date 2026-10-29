@@ -59,11 +59,11 @@ end
 -- Loads languages from disk
 local function Language_LoadData()
 	languages = {}
-	local lfiles = fsfind("resources/lidarscanner2_languages/lidarscanner2_language_*.txt","GAME","nameasc")
+	local lfiles = fsfind("data_static/lidarscanner2_languages/lidarscanner2_language_*.txt","GAME","nameasc")
 	for _,fn in pairs(lfiles) do
 		-- Short Name: If input string equals "lidarscanner2_language_en.txt" then sname will be "en"
 		local sname = smatch(fn,"^.+language_([a-z]+)%.txt$")
-		local ifile = fopen("resources/lidarscanner2_languages/" .. fn,"r","GAME")
+		local ifile = fopen("data_static/lidarscanner2_languages/" .. fn,"r","GAME")
 		if ifile then
 			-- Full Name
 			local fname = freadline(ifile)
