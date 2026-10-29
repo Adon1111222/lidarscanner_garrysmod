@@ -49,8 +49,20 @@ number .min - slider only. minimum value <br/>
 number .max - slider only. maximum value <br/>
 number .dec - slider only. number of digits after the decimal point <br/>
 
-**Examples of extensions can be seen in source/lidarscanner2/lua/lidarscanner2_extensions/** <br/>
 **The source code of extensions is not checked and not restricted within the Lua global environment.** <br/>
+**Examples of extensions can be seen in source/lidarscanner2/lua/lidarscanner2_extensions/** <br/>
+
+## Localization
+This addon uses simple `resources/lidarscanner2_languages/lidarscanner2_language_langname.txt` (where 'langname' is the language id in game format) text files to store localization strings. <br/>
+Simplified localization file structure: <br/>
+The first line displays the full language name. Example: English, Simple <br/>
+Next lines can be: <br/>
+A line-comment starting with ? <br/>
+An empty line. <br/>
+A line in the following format: `[#strname]\tstrvalue` (where 'strname' is the name of localization string, '\t' is the tabulation character, and 'strvalue' is the value of localization string) <br/>
+
+**Incorrect file structure will result in loss of some data during loading.** <br/>
+**Examples of localizations can be seen in resources/lidarscanner2_languages/** <br/>
 
 ## API
 The `source/lidarscanner2/lua/autorun/lidarscanner2.lua` file contains all the key functionality for working with it. <br/>
