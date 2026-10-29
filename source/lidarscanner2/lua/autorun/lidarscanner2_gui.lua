@@ -1,3 +1,5 @@
+-- LidarScanner 2 GUI file
+
 AddCSLuaFile()
 AddCSLuaFile("lidarscanner2_language.lua")
 if CLIENT then
