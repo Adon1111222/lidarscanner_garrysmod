@@ -1,0 +1,132 @@
+Русский(Россия)
+? Lidar scanner 2.3 GUI localization file
+? General
+[#lidarscanner_bindingbutton_help]	Теперь откройте консоль, вставьте текст из буфера обмена используя CTR+V и нажмите Enter
+[#lidarscanner_warning]	ВНИМАНИЕ
+[#lidarscanner_warning_yes]	ДА
+[#lidarscanner_warning_no]	НЕТ
+
+? Bindings Menu
+[#lidarscanner_bindsmenu_title]	Меню Биндов
+[#lidarscanner_bindsmenu_scansize_up]	Увеличить размер пучка
+[#lidarscanner_bindsmenu_scansize_down]	Уменьшить размер пучка
+[#lidarscanner_bindsmenu_unlockscansizescroll]	Разблок. управление\nразмером колёсиком\nмыши
+
+? Extensions Menu
+[#lidarscanner_extensionsmenu_title]	Меню Расширений
+[#lidarscanner_extensionsmenu_toggleext_help]	Зажмите SHIFT для переключения
+[#lidarscanner_extensionsmenu_currentext_none]	ВЫБЕРИТЕ\nРАСШИРЕНИЕ
+[#lidarscanner_extensionsmenu_ext_colouron]	ЦВЕТ
+[#lidarscanner_extensionsmenu_ext_index]	№
+[#lidarscanner_extensionsmenu_ext_on]	Включено
+[#lidarscanner_extensionsmenu_ext_name]	Имя
+[#lidarscanner_extensionsmenu_ext_version]	Вер.
+[#lidarscanner_extensionsmenu_ext_colourfunc]	Цвет.
+[#lidarscanner_extensionsmenu_ext_prescanfunc]	PreScan
+[#lidarscanner_extensionsmenu_ext_postscanfunc]	PostScan
+[#lidarscanner_extensionsmenu_refresh]	обновить
+[#lidarscanner_extensionsmenu_reload]	перезагруз.
+[#lidarscanner_extensionsmenu_currentext_setascolour]	УСТАНОВИТЬ ЦВЕТОВЫМ\nАЛГОРИТМОМ
+[#lidarscanner_extensionsmenu_currentext_toggle]	ПЕРЕКЛЮЧИТЬ РАСШИРЕНИЕ
+
+? Scan Lines menu
+[#lidarscanner_scanlinesmenu]	Меню Линий Сканирования
+[#lidarscanner_scanlinesmenu_linescolour]	Цвет Линий:
+[#lidarscanner_scanlinesmenu_backgroundcolour]	Цвет Заднего Плана:
+[#lidarscanner_scanlinesmenu_scanlines_r]	Линии R
+[#lidarscanner_scanlinesmenu_scanlines_g]	Линии G
+[#lidarscanner_scanlinesmenu_scanlines_b]	Линии B
+
+? Save Scans menu
+[#lidarscanner_savescansmenu_title]	Сохранение Скана
+[#lidarscanner_savescansmenu_save_help]	имя сохранения без расширения
+[#lidarscanner_savescansmenu_save]	СОХРАНИТЬ
+[#lidarscanner_savescansmenu_saving]	это может занять некоторое время...\nВы можете видеть прогресс в файле\nGarry's Mod/garrysmod/data/lidarscanner_savedscans/_info.json
+
+? Load Scans menu
+[#lidarscanner_loadscansmenu_title]	Загрузка Скана
+[#lidarscanner_loadscansmenu_file_index]	№
+[#lidarscanner_loadscansmenu_file_name]	Имя
+[#lidarscanner_loadscansmenu_file_size_kb]	Размер(КБ)
+[#lidarscanner_loadscansmenu_file_date]	Дата(Ч:М:С Д.М.Г)
+[#lidarscanner_loadscansmenu_cleardots]	Очистить точки\nперед загрузкой
+[#lidarscanner_loadscansmenu_delete_file]	УДАЛИТЬ
+[#lidarscanner_loadscansmenu_delete_file_warning]	Вы уверены что хотите удалить\nсохранение скана?
+[#lidarscanner_loadscansmenu_load_file]	ЗАГРУЗИТЬ
+[#lidarscanner_loadscansmenu_load_seconds]	 сек.
+[#lidarscanner_loadscansmenu_refresh]	ОБНОВИТЬ
+
+? Save/Load menu
+[#lidarscanner_saveloadmenu_title]	Меню Сохранений
+[#lidarscanner_saveloadmenu_extensions]	Расширения
+[#lidarscanner_saveloadmenu_loadcfg]	ЗАГР.\nНАСТР.
+[#lidarscanner_saveloadmenu_savecfg]	СОХР.\nНАСТР.
+[#lidarscanner_saveloadmenu_scanssaves]	Сохранения сканов
+[#lidarscanner_saveloadmenu_loadscans]	ЗАГР.
+[#lidarscanner_saveloadmenu_savescans]	СОХР.
+[#lidarscanner_saveloadmenu_prenotify]	ЧТОБЫ ФУНКЦИЯ СОХРАНЕНИЯ СКАНОВ РАБОТАЛА,\nВАМ НУЖНО УСТАНОВИТЬ lidarscanner_savedots 1 \nПЕРЕД СКАНИРОВАНИЕМ!!!!!!
+
+? Dot menu
+[#lidarscanner_dotmenu_title]	Меню Точек
+[#lidarscanner_dotmenu_custom_help]	Введите сюда полн. путь локально папки игры /materials к собств. точке
+
+? Main Lidar Scanner menu
+[#lidarscanner_clearscans]	   ОЧИСТИТЬ\n   СКАНЫ
+[#lidarscanner_clearscans_warning]	Вы уверены что хотите очистить все сканы?
+[#lidarscanner_binds]	БИНДЫ
+[#lidarscanner_extensions]	РАСШИРЕНИЯ
+[#lidarscanner_rebuildfromsaved]	ПЕРЕСТРОИТЬ\nСЕТКИ
+[#lidarscanner_rebuildfromsaved_warning]	Вы уверены что хотите перестроить\nстатичные сетки из сохранённых точек?\n Все несохранённые точки будут утеряны!
+[#lidarscanner_saveloadmenu]	СОХРАНЕНИЯ
+[#lidarscanner_resetsettings]	СБРОСИТЬ НАСТРОЙКИ
+[#lidarscanner_resetsettings_warning]	Вы уверены что хотите сбросить настройки?
+[#lidarscanner_scanlinescolour]	ЦВЕТА ЛИНИЙ\nСКАНИРОВАНИЯ
+
+[#lidarscanner_burstscan]	Пакетное Сканирование
+[#lidarscanner_burstscan_rotated]	Повернуть
+[#lidarscanner_burstscan_reverse]	Обратить
+[#lidarscanner_burstscan_180scan]	180 градусов
+[#lidarscanner_burstscan_360scan]	360 градусов
+[#lidarscanner_burstscan_type]	Тип Пакетного Сканирования
+[#lidarscanner_burstscan_type_normal]	Обычный
+[#lidarscanner_burstscan_type_interleaved]	Чересстрочный
+[#lidarscanner_burstscan_type_crossed]	Перекрещивающийся
+
+[#lidarscanner_other]	Другое
+[#lidarscanner_weaponhud]	HUD оружия
+[#lidarscanner_optimize_visible]	Оптимиз. видим.
+[#lidarscanner_optimize_colour]	Оптимиз. цвета
+[#lidarscanner_glitch]	Сбои
+[#lidarscanner_prescan_functions]	Функции PreScan
+[#lidarscanner_postscan_functions]	Функции PostScan
+[#lidarscanner_savedots]	!!Сохран. точки!!
+[#lidarscanner_seeker]	Наблюдатель(адм)
+
+[#lidarscanner_serverside]	Серверные настройки: Только для администрации
+[#lidarscanner_maxdist]	Макс. Расстояние
+[#lidarscanner_multiplayerbridge]	Multiplayer bridge
+
+[#lidarscanner_general]	Основное
+[#lidarscanner_enabled]	Включить
+[#lidarscanner_blindness_enabled]	Включить слепоту
+[#lidarscanner_mirror_enabled]	Включить отражение
+[#lidarscanner_mirror_input]	Отражать управление
+
+[#lidarscanner_scan]	Сканирование
+[#lidarscanner_dot_shape]	Форма точки: 
+[#lidarscanner_dot_size]	Размер точки
+[#lidarscanner_maxdots]	Макс. точек
+[#lidarscanner_maxmeshes]	Макс. сеток
+[#lidarscanner_nohitsky]	Игнор. неба
+		
+[#lidarscanner_viewmodel]	Модель оружия
+[#lidarscanner_viewmodel_blurscale]	Размытие
+[#lidarscanner_viewmodel_farscale]	Удалённость
+
+[#lidarscanner_fastscan]	Быстрое Сканирование
+[#lidarscanner_fastscan_size]	Размер пучка
+[#lidarscanner_fastscan_bind_size_delta]	Дельта бинда размера
+[#lidarscanner_fastscan_size_scroll]	Управление размером колёсиком мыши
+[#lidarscanner_fastscan_dotsperscan]	Точек на сканирование
+
+[#lidarscanner_developer]	Отладка
