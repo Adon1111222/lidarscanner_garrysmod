@@ -1,0 +1,132 @@
+English, Simple
+? Lidar scanner 2.3 GUI localization file
+? General
+[#lidarscanner_bindingbutton_help]	Now open the console, paste the clipboard text using CTR+V and press Enter
+[#lidarscanner_warning]	WARNING
+[#lidarscanner_warning_yes]	Y
+[#lidarscanner_warning_no]	NO
+
+? Bindings Menu
+[#lidarscanner_bindsmenu_title]	Bindings Menu
+[#lidarscanner_bindsmenu_scansize_up]	Increase Scan Size
+[#lidarscanner_bindsmenu_scansize_down]	Decrease Scan Size
+[#lidarscanner_bindsmenu_unlockscansizescroll]	Unlock Scroll Scan Size
+
+? Extensions Menu
+[#lidarscanner_extensionsmenu_title]	Extensions Menu
+[#lidarscanner_extensionsmenu_toggleext_help]	SHIFT to toggle extension
+[#lidarscanner_extensionsmenu_currentext_none]	SELECT\nEXTENSION
+[#lidarscanner_extensionsmenu_ext_colouron]	CLR
+[#lidarscanner_extensionsmenu_ext_index]	Ind
+[#lidarscanner_extensionsmenu_ext_on]	Enabled
+[#lidarscanner_extensionsmenu_ext_name]	Name
+[#lidarscanner_extensionsmenu_ext_version]	Ver
+[#lidarscanner_extensionsmenu_ext_colourfunc]	Colour
+[#lidarscanner_extensionsmenu_ext_prescanfunc]	PreScan
+[#lidarscanner_extensionsmenu_ext_postscanfunc]	PostScan
+[#lidarscanner_extensionsmenu_refresh]	refresh
+[#lidarscanner_extensionsmenu_reload]	reload
+[#lidarscanner_extensionsmenu_currentext_setascolour]	SET AS COLOUR ALGORITHM
+[#lidarscanner_extensionsmenu_currentext_toggle]	TOGGLE EXTENSION
+
+? Scan Lines menu
+[#lidarscanner_scanlinesmenu]	Scan Lines Menu
+[#lidarscanner_scanlinesmenu_linescolour]	Scan lines colour:
+[#lidarscanner_scanlinesmenu_backgroundcolour]	Background colour:
+[#lidarscanner_scanlinesmenu_scanlines_r]	Scan lines R
+[#lidarscanner_scanlinesmenu_scanlines_g]	Scan lines G
+[#lidarscanner_scanlinesmenu_scanlines_b]	Scan lines B
+
+? Save Scans menu
+[#lidarscanner_savescansmenu_title]	Save Scans Menu
+[#lidarscanner_savescansmenu_save_help]	scan save name without extension
+[#lidarscanner_savescansmenu_save]	SAVE
+[#lidarscanner_savescansmenu_saving]	please wait, this might take some time...\nyou can watch the process in the file Garry's Mod/garrysmod/data/lidarscanner_savedscans/_info.json
+
+? Load Scans menu
+[#lidarscanner_loadscansmenu_title]	Load Scans Menu
+[#lidarscanner_loadscansmenu_file_index]	Ind
+[#lidarscanner_loadscansmenu_file_name]	Name
+[#lidarscanner_loadscansmenu_file_size_kb]	Size(KB)
+[#lidarscanner_loadscansmenu_file_date]	Date(H:M:S D.M.Y)
+[#lidarscanner_loadscansmenu_cleardots]	Clear dots\nbefore load
+[#lidarscanner_loadscansmenu_delete_file]	DELETE
+[#lidarscanner_loadscansmenu_delete_file_warning]	Are you sure you want to delete scan file?
+[#lidarscanner_loadscansmenu_load_file]	LOAD
+[#lidarscanner_loadscansmenu_load_seconds]	 sec
+[#lidarscanner_loadscansmenu_refresh]	REFRESH
+
+? Save/Load menu
+[#lidarscanner_saveloadmenu_title]	Save/Load Menu
+[#lidarscanner_saveloadmenu_extensions]	Extensions
+[#lidarscanner_saveloadmenu_loadcfg]	LOAD CFG
+[#lidarscanner_saveloadmenu_savecfg]	SAVE CFG
+[#lidarscanner_saveloadmenu_scanssaves]	Scans saves
+[#lidarscanner_saveloadmenu_loadscans]	LOAD
+[#lidarscanner_saveloadmenu_savescans]	SAVE
+[#lidarscanner_saveloadmenu_prenotify]	FOR THE SCANS SAVE FUNCTION TO WORK,\nYOU NEED lidarscanner_savedots 1 \nBEFORE SCANNING!!!!!!
+
+? Dot menu
+[#lidarscanner_dotmenu_title]	Dot Menu
+[#lidarscanner_dotmenu_custom_help]	Enter here full path relative to the game's /materials folder to a custom dot file
+
+? Main Lidar Scanner menu
+[#lidarscanner_clearscans]	   CLEAR\n   SCANS
+[#lidarscanner_clearscans_warning]	Are you sure you want to clear all scans?
+[#lidarscanner_binds]	BINDS
+[#lidarscanner_extensions]	EXTENSIONS
+[#lidarscanner_rebuildfromsaved]	REBUILD FROM SAVED
+[#lidarscanner_rebuildfromsaved_warning]	Are you sure you want to rebuild\nstatic meshes from saved dots?\n All non-saved dots will be lost!
+[#lidarscanner_saveloadmenu]	SAVE/LOAD MENU
+[#lidarscanner_resetsettings]	RESET SETTINGS
+[#lidarscanner_resetsettings_warning]	Are you sure you want to reset settings?
+[#lidarscanner_scanlinescolour]	SCAN LINES COLOUR
+
+[#lidarscanner_burstscan]	Burst Scan
+[#lidarscanner_burstscan_rotated]	Rotated
+[#lidarscanner_burstscan_reverse]	Reversed
+[#lidarscanner_burstscan_180scan]	180 degrees
+[#lidarscanner_burstscan_360scan]	360 degrees
+[#lidarscanner_burstscan_type]	Burst Scan type
+[#lidarscanner_burstscan_type_normal]	Normal
+[#lidarscanner_burstscan_type_interleaved]	Interleaved
+[#lidarscanner_burstscan_type_crossed]	Crossed
+
+[#lidarscanner_other]	Other
+[#lidarscanner_weaponhud]	Weapon HUD
+[#lidarscanner_optimize_visible]	Optimize Visible
+[#lidarscanner_optimize_colour]	Optimize Colour
+[#lidarscanner_glitch]	Glitch
+[#lidarscanner_prescan_functions]	PreScan Functions
+[#lidarscanner_postscan_functions]	PostScan Functions
+[#lidarscanner_savedots]	!!Save Dots!!
+[#lidarscanner_seeker]	Seeker(admin only)
+
+[#lidarscanner_serverside]	Serverside Settings: Admin Only
+[#lidarscanner_maxdist]	Max. Scan Dist
+[#lidarscanner_multiplayerbridge]	Multiplayer bridge
+
+[#lidarscanner_general]	General
+[#lidarscanner_enabled]	Enabled
+[#lidarscanner_blindness_enabled]	Blindness enabled
+[#lidarscanner_mirror_enabled]	Mirror enabled
+[#lidarscanner_mirror_input]	Mirror input
+
+[#lidarscanner_scan]	Scan
+[#lidarscanner_dot_shape]	Dot shape: 
+[#lidarscanner_dot_size]	Dot Size
+[#lidarscanner_maxdots]	Max dots
+[#lidarscanner_maxmeshes]	Max meshes
+[#lidarscanner_nohitsky]	No Hit Sky
+		
+[#lidarscanner_viewmodel]	View Model
+[#lidarscanner_viewmodel_blurscale]	Blur Scale
+[#lidarscanner_viewmodel_farscale]	Far Scale
+
+[#lidarscanner_fastscan]	Fast Scan
+[#lidarscanner_fastscan_size]	Scan Size
+[#lidarscanner_fastscan_bind_size_delta]	Scan Size Bind Difference
+[#lidarscanner_fastscan_size_scroll]	Scan Size Scroll Control
+[#lidarscanner_fastscan_dotsperscan]	Dots per scan
+
+[#lidarscanner_developer]	Developer
