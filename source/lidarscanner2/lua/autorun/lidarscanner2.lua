@@ -4,6 +4,7 @@ AddCSLuaFile()
 
 LIDARSCANNER_VERSION = "2.3"
 
+-- Functions that can be re-defined
 local utraceline = util.TraceLine
 local smatch = string.match
 local randf = math.Rand
