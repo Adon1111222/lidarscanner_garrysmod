@@ -10,6 +10,11 @@ ENT.Instructions = ""
 ENT.Spawnable = true
 ENT.AdminSpawnable = true
 
+local LSCANNERWEP_NET_FAST_SCAN = -2
+
+local LIDARSCANNER_SOUND_FASTSCANNING = "lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav"
+local LIDARSCANNER_SOUND_ONSTOPSCANNING = "lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav"
+
 function ENT:SetupDataTables()
 	self:NetworkVar("Entity",0,"Scanning")
 end
@@ -49,7 +54,7 @@ if SERVER then
         local scanning = self:GetScanning()
         if IsValid(scanning) then
             net.Start("lidarscanner2_network")
-                net.WriteInt(-2,3)
+                net.WriteInt(LSCANNERWEP_NET_FAST_SCAN,3)
                 net.WriteVector(self:GetPos())
                 net.WriteAngle(self:GetAngles())
                 net.WriteEntity(self)
@@ -61,20 +66,20 @@ if SERVER then
 end
 function ENT:Use(ply)
     if not IsValid(self:GetScanning()) then
-        self:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
+        self:EmitSound(LIDARSCANNER_SOUND_FASTSCANNING)
         self:SetScanning(ply)
         timer.Simple(1,function()
             if IsValid(self) then
                 self:SetScanning(nil)
-                self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
-                self:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav")
+                self:StopSound(LIDARSCANNER_SOUND_FASTSCANNING)
+                self:EmitSound(LIDARSCANNER_SOUND_ONSTOPSCANNING)
             end
         end)
     end
 end
 function ENT:OnRemove()
     if SERVER then
-        self:StopSound("lidarscanner2_sounds_valve/lidarscanner2_fastscanning1.wav")
-        self:EmitSound("lidarscanner2_sounds_valve/lidarscanner2_onstopscanning.wav")
+        self:StopSound(LIDARSCANNER_SOUND_FASTSCANNING)
+        self:EmitSound(LIDARSCANNER_SOUND_ONSTOPSCANNING)
     end
 end
